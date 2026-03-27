@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Alcon - v3.0 Final</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --rojo: #e63946; --azul: #2b2d42; --fondo: #f8f9fa; --blanco: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--fondo); margin: 0; display: flex; color: var(--azul); }
+        
+        .sidebar { width: 260px; background: var(--blanco); height: 100vh; border-right: 1px solid #ddd; position: fixed; display: flex; flex-direction: column; }
+        .sidebar .logo { padding: 30px; text-align: center; color: var(--rojo); font-size: 24px; font-weight: bold; border-bottom: 1px solid #eee; }
+        .sidebar a { padding: 18px 25px; color: var(--azul); text-decoration: none; cursor: pointer; border-left: 5px solid transparent; transition: 0.3s; }
+        .sidebar a.active { background: #fff0f1; color: var(--rojo); border-left: 5px solid var(--rojo); font-weight: bold; }
+
+        .main { margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
+        .sec { display: none; }
+        .sec.active { display: block; }
+
+        .card-calc { background: var(--azul); color: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin: 20px 0; }
+        input, select { padding: 12px; border-radius: 10px; border: none; outline: none; }
+        
+        .btn { background: var(--rojo); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn-ws { background: #25d366; color: white; margin-top: 10px; display: inline-flex; align-items: center; gap: 8px; }
+
+        .grid-unidades { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card-u { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .u-img { width: 100%; height: 150px; object-fit: contain; padding: 15px; background: #fff; }
+        .u-hist { padding: 15px; background: #fafafa; border-top: 1px solid #eee; font-size: 0.85em; max-height: 120px; overflow-y: auto; }
+
+        .cal-box { background: white; padding: 25px; border-radius: 20px; }
+        .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; margin-top: 15px; }
+        .day { padding: 15px; border: 1px solid #eee; border-radius: 8px; cursor: pointer; }
+        .day.sel { background: var(--rojo); color: white; font-weight: bold; }
+
+        .tabla { width: 100%; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden; margin-top: 20px; }
+        .tabla th, .tabla td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">ALCON LOGISTICS</div>
+        <a id="n-home" onclick="ir('home',true)" class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a id="n-cal" onclick="ir('cal',true)"><i class="fas fa-calendar-check"></i> Mi Calendario</a>
+        <a id="n-hist" onclick="ir('hist',true)"><i class="fas fa-clipboard-list"></i> Historial</a>
+    </div>
+
+    <div class="main">
+        <div id="s-home" class="sec active">
+            <div class="card-calc">
+                <h3><i class="fas fa-route"></i> Generador de Cotizaciones Reales</h3>
+                <div class="inputs">
+                    <select id="tarifa">
+                        <option value="14.21">Tráiler ($14.21/km)</option>
+                        <option value="4.73">Camioneta 3.5T ($4.73/km)</option>
+                        <option value="2.96">Camioneta 1.5T ($2.96/km)</option>
+                    </select>
+                    <input type="text" id="ori" placeholder="Ciudad Origen">
+                    <input type="text" id="des" placeholder="Ciudad Destino">
+                    <button class="btn" onclick="cotizar()">Calcular Ruta</button>
+                </div>
+                <div id="res" style="display:none; padding:20px; background:rgba(255,255,255,0.1); border-radius:15px;">
+                    <div id="info"></div>
+                    <button class="btn" style="background:#4cc9f0; color:#000; margin-top:10px;" onclick="guardar()">Guardar Localmente</button>
+                    <button id="btn-ws" class="btn btn-ws" onclick="enviarWS()"><i class="fab fa-whatsapp"></i> Enviar al Cliente</button>
+                </div>
+            </div>
+
+            <div class="grid-unidades">
+                <div class="card-u">
+                    <img src="https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=400" class="u-img">
+                    <div style="padding:15px"><h4>Tráiler Caja Seca</h4><button class="btn" onclick="agendar('Tráiler Caja Seca')">Agendar</button></div>
+                    <div class="u-hist" id="h1">Sin registros.</div>
+                </div>
+                <div class="card-u">
+                    <img src="https://th.bing.com/th/id/OIP.nfBs-HTaNVy5UyPM1xw3swHaGC?w=210" class="u-img">
+                    <div style="padding:15px"><h4>Camioneta 3.5 Ton</h4><button class="btn" onclick="agendar('Camioneta 3.5 Ton')">Agendar</button></div>
+                    <div class="u-hist" id="h2">Sin registros.</div>
+                </div>
+                <div class="card-u">
+                    <img src="https://th.bing.com/th/id/OIP.xoN5FjI06m5JT4vgVj7sKwHaE8?w=239" class="u-img">
+                    <div style="padding:15px"><h4>Camioneta 1.5 Ton</h4><button class="btn" onclick="agendar('Camioneta 1.5 Ton')">Agendar</button></div>
+                    <div class="u-hist" id="h3">Sin registros.</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="s-cal" class="sec">
+            <div class="cal-box">
+                <h3 id="c-title">Agendar Viaje</h3>
+                <div class="days" id="c-grid"></div>
+                <div style="margin-top:20px; padding:20px; background:#f9f9f9; border-radius:15px;">
+                    <p>Fecha: <b id="f-txt">26 de Marzo</b></p>
+                    <input type="text" id="v-des" placeholder="¿A dónde va?" style="width:50%; margin-right:10px;">
+                    <input type="time" id="v-hr" value="08:00">
+                    <button class="btn" onclick="guardarV()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="s-hist" class="sec">
+            <h3>Registro de Cotizaciones</h3>
+            <table class="tabla"><thead id="t-head"><tr><th>Ruta</th><th>Km</th><th>Total</th></tr></thead><tbody id="l-cot"></tbody></table>
+        </div>
+    </div>
+
+    <script>
+        let uni = "", fSel = "26 de Marzo", cAct = null;
+
+        function ir(id, p) {
+            document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+            document.getElementById('s-'+id).classList.add('active');
+            document.getElementById('n-'+id).classList.add('active');
+            if(p) history.pushState({id}, "", "#"+id);
+        }
+        window.onpopstate = (e) => ir(e.state?.id || 'home', false);
+
+        async function cotizar() {
+            const o = document.getElementById('ori').value, d = document.getElementById('des').value, t = document.getElementById('tarifa').value;
+            if(!o || !d) return alert("Completa los datos");
+            try {
+                const rO = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${o}`), dO = await rO.json();
+                const rD = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${d}`), dD = await rD.json();
+                const R = 6371;
+                const dLat = (dD[0].lat-dO[0].lat)*Math.PI/180, dLon = (dD[0].lon-dO[0].lon)*Math.PI/180;
+                const a = Math.sin(dLat/2)**2 + Math.cos(dO[0].lat*Math.PI/180)*Math.cos(dD[0].lat*Math.PI/180)*Math.sin(dLon/2)**2;
+                let dist = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))) * 1.25; 
+                const tot = (dist * t).toFixed(2);
+                document.getElementById('res').style.display = 'block';
+                document.getElementById('info').innerHTML = `Distancia: ${dist.toFixed(1)} km | <b>Total: $${tot} MXN</b>`;
+                cAct = { o, d, tot, dist: dist.toFixed(1), u: document.getElementById('tarifa').options[document.getElementById('tarifa').selectedIndex].text.split(' ')[0] };
+            } catch(e) { alert("Error buscando ciudades."); }
+        }
+
+        function enviarWS() {
+            const msg = `*ALCON LOGISTICS - COTIZACIÓN*%0A%0A📍 *Ruta:* ${cAct.o} a ${cAct.d}%0A🚛 *Unidad:* ${cAct.u}%0A🛣️ *KM:* ${cAct.dist} km%0A💰 *Total:* $${cAct.tot} MXN%0A%0A_Sujeto a cambios sin previo aviso._`;
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
+        }
+
+        function guardar() { document.getElementById('l-cot').innerHTML += `<tr><td>${cAct.o}-${cAct.d}</td><td>${cAct.dist}</td><td>$${cAct.tot}</td></tr>`; alert("Guardado"); }
+
+        function agendar(n) { uni = n; document.getElementById('c-title').innerText = "Agendar: " + n; ir('cal', true); }
+        function render() {
+            const g = document.getElementById('c-grid'); g.innerHTML = "";
+            for(let i=1; i<=31; i++) g.innerHTML += `<div class="day ${i===26?'sel':''}" onclick="sel(${i},this)">${i}</div>`;
+        }
+        function sel(d,e) { document.querySelectorAll('.day').forEach(x=>x.classList.remove('sel')); e.classList.add('sel'); fSel = d+" de Marzo"; document.getElementById('f-txt').innerText=fSel; }
+        
+        function guardarV() {
+            const ds = document.getElementById('v-des').value, hr = document.getElementById('v-hr').value;
+            const bId = uni.includes('Tráiler') ? 'h1' : (uni.includes('3.5') ? 'h2' : 'h3');
+            const b = document.getElementById(bId);
+            if(b.innerText.includes("Sin")) b.innerHTML = "";
+            b.innerHTML += `<div><b>${hr}</b> - ${fSel}: ${ds}</div>`;
+            alert("Agendado"); ir('home', true);
+        }
+        render();
+    </script>
+</body>
+</html>
