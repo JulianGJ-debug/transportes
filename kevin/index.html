@@ -3,168 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALCON - Dashboard Móvil</title>
+    <title>ALCON Logistics - Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --rojo: #e63946; --azul: #2b2d42; --fondo: #f8f9fa; --blanco: #ffffff; }
-        
         * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--fondo); margin: 0; display: flex; flex-direction: column; color: var(--azul); }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--fondo); margin: 0; color: var(--azul); display: flex; flex-direction: column; }
 
-        /* --- BARRA LATERAL ADAPTABLE --- */
+        /* Sidebar - Responsivo */
         .sidebar { 
-            width: 260px; background: var(--blanco); height: 100vh; 
-            border-right: 1px solid #ddd; position: fixed; display: flex; flex-direction: column; 
-            transition: 0.3s; z-index: 1000;
+            width: 260px; background: var(--blanco); height: 100vh; position: fixed; 
+            border-right: 1px solid #ddd; display: flex; flex-direction: column; z-index: 1000;
         }
-        .sidebar .logo { padding: 25px; text-align: center; color: var(--rojo); font-size: 22px; font-weight: bold; border-bottom: 1px solid #eee; }
+        .logo { padding: 25px; text-align: center; color: var(--rojo); font-size: 22px; font-weight: bold; border-bottom: 1px solid #eee; }
         .sidebar a { padding: 15px 25px; color: var(--azul); text-decoration: none; cursor: pointer; border-left: 5px solid transparent; display: flex; align-items: center; gap: 10px; }
         .sidebar a.active { background: #fff0f1; color: var(--rojo); border-left: 5px solid var(--rojo); font-weight: bold; }
 
-        /* --- CONTENIDO PRINCIPAL --- */
-        .main { margin-left: 260px; padding: 20px; width: calc(100% - 260px); transition: 0.3s; }
+        /* Contenido */
+        .main { margin-left: 260px; padding: 30px; width: calc(100% - 260px); min-height: 100vh; }
         .sec { display: none; }
         .sec.active { display: block; }
 
-        /* --- TARJETAS Y CALCULADORA --- */
-        .card-calc { background: var(--azul); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
-        .inputs { display: flex; flex-direction: column; gap: 10px; margin: 15px 0; }
-        input, select, .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-size: 16px; }
-        .btn { background: var(--rojo); color: white; cursor: pointer; font-weight: bold; }
-        
-        .grid-unidades { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 20px; 
-        }
-        .card-u { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .u-img { width: 100%; height: 140px; object-fit: contain; padding: 10px; }
+        /* Tarjetas */
+        .card-calc { background: var(--azul); color: white; padding: 25px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        input, select, .btn { padding: 12px; border-radius: 10px; border: none; font-size: 16px; width: 100%; }
+        .btn { background: var(--rojo); color: white; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
 
-        /* --- CALENDARIO --- */
-        .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-top: 10px; }
-        .day { padding: 10px 5px; border: 1px solid #eee; font-size: 12px; text-align: center; cursor: pointer; border-radius: 5px; }
-        .day.sel { background: var(--rojo); color: white; }
+        .grid-unidades { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card-u { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .u-img { width: 100%; height: 160px; object-fit: contain; padding: 15px; }
+        .u-body { padding: 15px; }
+        .u-hist { padding: 15px; background: #fafafa; border-top: 1px solid #eee; font-size: 0.85em; max-height: 100px; overflow-y: auto; }
 
-        /* --- AJUSTES PARA CELULAR (MEDIA QUERY) --- */
+        /* Media Query para Celular */
         @media (max-width: 768px) {
-            .sidebar { 
-                width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid #ddd;
-            }
-            .sidebar .logo { padding: 15px; }
-            .sidebar a { padding: 12px; justify-content: center; font-size: 14px; border-left: none; border-bottom: 3px solid transparent; }
-            .sidebar a.active { border-left: none; border-bottom: 3px solid var(--rojo); }
-            .sidebar { flex-direction: row; flex-wrap: wrap; justify-content: center; }
-            
+            .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; flex-wrap: wrap; justify-content: center; border-right: none; border-bottom: 1px solid #ddd; }
+            .sidebar a { padding: 10px; font-size: 13px; border-left: none; border-bottom: 3px solid transparent; }
+            .sidebar a.active { border-bottom: 3px solid var(--rojo); background: none; }
             .main { margin-left: 0; width: 100%; padding: 15px; }
-            .grid-unidades { grid-template-columns: 1fr; } /* Un solo camión por fila en el cel */
-            
             .inputs { grid-template-columns: 1fr; }
-            .tabla { font-size: 12px; } /* Tabla más chiquita para que quepa */
+            .grid-unidades { grid-template-columns: 1fr; }
         }
+
+        /* Calendario */
+        .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 15px; }
+        .day { padding: 10px; border: 1px solid #eee; text-align: center; cursor: pointer; border-radius: 8px; }
+        .day.sel { background: var(--rojo); color: white; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="logo">ALCON</div>
-        <a id="n-home" onclick="ir('home')" class="active"><i class="fas fa-home"></i> Inicio</a>
-        <a id="n-cal" onclick="ir('cal')"><i class="fas fa-calendar"></i> Agenda</a>
-        <a id="n-hist" onclick="ir('hist')"><i class="fas fa-list"></i> Rutas</a>
+        <div class="logo">ALCON LOGISTICS</div>
+        <a id="n-home" onclick="nav('home')" class="active"><i class="fas fa-home"></i> Inicio</a>
+        <a id="n-cal" onclick="nav('cal')"><i class="fas fa-calendar"></i> Agenda</a>
+        <a id="n-hist" onclick="nav('hist')"><i class="fas fa-history"></i> Historial</a>
     </div>
 
     <div class="main">
         <div id="s-home" class="sec active">
             <div class="card-calc">
-                <h3>Cotizador Rápido</h3>
+                <h3><i class="fas fa-calculator"></i> Cotizador ALCON</h3>
                 <div class="inputs">
                     <select id="tarifa">
                         <option value="14.21">Tráiler ($14.21/km)</option>
                         <option value="4.73">Camioneta 3.5T ($4.73/km)</option>
                         <option value="2.96">Camioneta 1.5T ($2.96/km)</option>
                     </select>
-                    <input type="text" id="ori" placeholder="Origen">
-                    <input type="text" id="des" placeholder="Destino">
-                    <button class="btn" onclick="cotizar()">Calcular</button>
+                    <input type="text" id="ori" placeholder="Ciudad Origen">
+                    <input type="text" id="des" placeholder="Ciudad Destino">
+                    <button class="btn" onclick="calcular()">Calcular Ruta</button>
                 </div>
-                <div id="res" style="display:none; padding:15px; background:rgba(255,255,255,0.1); border-radius:10px;">
-                    <div id="info"></div>
-                    <button class="btn" style="background:#25d366; margin-top:10px;" onclick="enviarWS()">WhatsApp</button>
+                <div id="res-box" style="display:none; padding:15px; background:rgba(255,255,255,0.1); border-radius:15px; border:1px solid #4cc9f0;">
+                    <div id="res-info"></div>
+                    <button class="btn" style="background:#25d366; margin-top:10px;" onclick="enviarWS()"><i class="fab fa-whatsapp"></i> Enviar Cotización</button>
                 </div>
             </div>
 
             <div class="grid-unidades">
                 <div class="card-u">
                     <img src="https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=400" class="u-img">
-                    <div style="padding:15px">
-                        <strong>Tráiler 53'</strong><br>
-                        <button class="btn" style="margin-top:10px;" onclick="agendar('Tráiler')">Agendar</button>
-                    </div>
+                    <div class="u-body"><h4>Tráiler Caja Seca</h4><button class="btn" onclick="agendar('Tráiler')">Agendar Viaje</button></div>
+                    <div class="u-hist" id="h1">Sin viajes.</div>
                 </div>
                 <div class="card-u">
                     <img src="https://th.bing.com/th/id/OIP.nfBs-HTaNVy5UyPM1xw3swHaGC?w=210" class="u-img">
-                    <div style="padding:15px">
-                        <strong>Camioneta 3.5T</strong><br>
-                        <button class="btn" style="margin-top:10px;" onclick="agendar('3.5 Ton')">Agendar</button>
-                    </div>
+                    <div class="u-body"><h4>Camioneta 3.5 Ton</h4><button class="btn" onclick="agendar('3.5 Ton')">Agendar Viaje</button></div>
+                    <div class="u-hist" id="h2">Sin viajes.</div>
+                </div>
+                <div class="card-u">
+                    <img src="https://th.bing.com/th/id/OIP.xoN5FjI06m5JT4vgVj7sKwHaE8?w=239" class="u-img">
+                    <div class="u-body"><h4>Camioneta 1.5 Ton</h4><button class="btn" onclick="agendar('1.5 Ton')">Agendar Viaje</button></div>
+                    <div class="u-hist" id="h3">Sin viajes.</div>
                 </div>
             </div>
         </div>
 
         <div id="s-cal" class="sec">
-            <h3>Agenda de Viajes</h3>
+            <h3>Programar para: <span id="u-nom"></span></h3>
             <div class="days" id="c-grid"></div>
-            <div style="margin-top:15px;">
-                <input type="text" id="v-des" placeholder="Destino" style="border: 1px solid #ccc; margin-bottom:5px;">
-                <button class="btn" onclick="guardarV()">Confirmar Fecha</button>
+            <div style="margin-top:20px; background:white; padding:20px; border-radius:15px;">
+                <p>Fecha: <b id="f-txt">26 de Marzo</b></p>
+                <input type="text" id="v-destino" placeholder="Destino Final" style="border: 1px solid #ddd; margin-bottom:10px;">
+                <button class="btn" onclick="confirmarV()">Guardar Registro</button>
             </div>
         </div>
 
         <div id="s-hist" class="sec">
-            <h3>Historial</h3>
-            <div id="l-cot" style="background:white; border-radius:10px; padding:10px;"></div>
+            <h3>Historial de Cotizaciones</h3>
+            <div id="lista-h" style="background:white; padding:15px; border-radius:15px;">Aún no hay rutas guardadas.</div>
         </div>
     </div>
 
     <script>
-        // ... (Se mantienen las funciones de cálculo y navegación del código anterior)
-        let uni = "", fSel = "26 de Marzo", cAct = null;
+        let uAct = "", fAct = "26 de Marzo", cData = null;
 
-        function ir(id) {
+        function nav(id) {
             document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
             document.getElementById('s-'+id).classList.add('active');
             document.getElementById('n-'+id).classList.add('active');
         }
 
-        async function cotizar() {
+        async function calcular() {
             const o = document.getElementById('ori').value, d = document.getElementById('des').value, t = document.getElementById('tarifa').value;
-            if(!o || !d) return alert("Faltan datos");
+            if(!o || !d) return alert("Escribe origen y destino");
             try {
                 const rO = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${o}`), dO = await rO.json();
                 const rD = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${d}`), dD = await rD.json();
                 const R = 6371;
                 const dLat = (dD[0].lat-dO[0].lat)*Math.PI/180, dLon = (dD[0].lon-dO[0].lon)*Math.PI/180;
                 const a = Math.sin(dLat/2)**2 + Math.cos(dO[0].lat*Math.PI/180)*Math.cos(dD[0].lat*Math.PI/180)*Math.sin(dLon/2)**2;
-                let dist = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))) * 1.25; 
-                const tot = (dist * t).toFixed(2);
-                document.getElementById('res').style.display = 'block';
-                document.getElementById('info').innerHTML = `<b>${dist.toFixed(1)} km - $${tot} MXN</b>`;
-                cAct = { o, d, tot, dist: dist.toFixed(1) };
-            } catch(e) { alert("Error de red"); }
+                let km = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))) * 1.25; 
+                const tot = (km * t).toFixed(2);
+                document.getElementById('res-box').style.display = 'block';
+                document.getElementById('res-info').innerHTML = `<b>Distancia:</b> ${km.toFixed(1)} km <br> <b>Total: $${tot} MXN</b>`;
+                cData = { o, d, tot, km: km.toFixed(1) };
+                
+                // Guardar en historial automáticamente
+                const h = document.getElementById('lista-h');
+                if(h.innerText.includes("Aún no")) h.innerHTML = "";
+                h.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;">${o} a ${d} - $${tot}</div>`;
+            } catch(e) { alert("Error al buscar ciudades"); }
         }
 
         function enviarWS() {
-            const msg = `*ALCON* - Cotización: ${cAct.o} a ${cAct.d} por $${cAct.tot}`;
+            const msg = `*ALCON LOGISTICS*%0A📍 Origen: ${cData.o}%0A🏁 Destino: ${cData.d}%0A🛣️ Distancia: ${cData.km} km%0A💰 *Total: $${cData.tot} MXN*`;
             window.open(`https://wa.me/?text=${msg}`, '_blank');
         }
 
-        function agendar(n) { uni = n; ir('cal'); render(); }
+        function agendar(n) { uAct = n; document.getElementById('u-nom').innerText = n; nav('cal'); render(); }
         function render() {
             const g = document.getElementById('c-grid'); g.innerHTML = "";
             for(let i=1; i<=31; i++) g.innerHTML += `<div class="day ${i===26?'sel':''}" onclick="sel(${i},this)">${i}</div>`;
         }
-        function sel(d,e) { document.querySelectorAll('.day').forEach(x=>x.classList.remove('sel')); e.classList.add('sel'); fSel = d+" de Marzo"; }
-        function guardarV() { alert("Viaje Agendado"); ir('home'); }
+        function sel(d,e) { document.querySelectorAll('.day').forEach(x=>x.classList.remove('sel')); e.classList.add('sel'); fAct = d+" de Marzo"; document.getElementById('f-txt').innerText=fAct; }
+        
+        function confirmarV() {
+            const ds = document.getElementById('v-destino').value;
+            if(!ds) return alert("Escribe el destino");
+            const bId = uAct === 'Tráiler' ? 'h1' : (uAct === '3.5 Ton' ? 'h2' : 'h3');
+            const box = document.getElementById(bId);
+            if(box.innerText.includes("Sin viajes")) box.innerHTML = "";
+            box.innerHTML += `<div><b>${fAct}:</b> ${ds}</div>`;
+            alert("¡Viaje agendado!"); nav('home');
+        }
         render();
     </script>
 </body>
